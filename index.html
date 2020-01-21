@@ -79,31 +79,31 @@
         // show sign up / registration form
         $(document).on("click", "#sign_up", function() {
           var html = `
-                    <h2>Sign Up</h2>
-                    <form id='sign_up_form'>
-                        <div class="form-group">
-                            <label for="firstname">Firstname</label>
-                            <input type="text" class="form-control" name="firstname" id="firstname" required />
-                        </div>
+                          <h2>Sign Up</h2>
+                          <form id='sign_up_form'>
+                              <div class="form-group">
+                                  <label for="firstname">Firstname</label>
+                                  <input type="text" class="form-control" name="firstname" id="firstname" required />
+                              </div>
 
-                        <div class="form-group">
-                            <label for="lastname">Lastname</label>
-                            <input type="text" class="form-control" name="lastname" id="lastname" required />
-                        </div>
+                              <div class="form-group">
+                                  <label for="lastname">Lastname</label>
+                                  <input type="text" class="form-control" name="lastname" id="lastname" required />
+                              </div>
 
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" class="form-control" name="email" id="email" required />
-                        </div>
+                              <div class="form-group">
+                                  <label for="email">Email</label>
+                                  <input type="email" class="form-control" name="email" id="email" required />
+                              </div>
 
-                        <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" class="form-control" name="password" id="password" required />
-                        </div>
+                              <div class="form-group">
+                                  <label for="password">Password</label>
+                                  <input type="password" class="form-control" name="password" id="password" required />
+                              </div>
 
-                        <button type='submit' class='btn btn-primary'>Sign Up</button>
-                    </form>
-                    `;
+                              <button type='submit' class='btn btn-primary'>Sign Up</button>
+                          </form>
+                          `;
 
           clearResponse();
           $("#content").html(html);
@@ -178,7 +178,13 @@
           return false;
         });
 
-        // trigger to show home page will be here
+        // show home page
+        $(document).on("click", "#home", function() {
+          showHomePage();
+          clearResponse();
+        });
+
+        // trigger to show account form will be here
 
         // remove any prompt messages
         function clearResponse() {
@@ -192,21 +198,21 @@
 
           // login page html
           var html = `
-        <h2>Login</h2>
-        <form id='login_form'>
-            <div class='form-group'>
-                <label for='email'>Email address</label>
-                <input type='email' class='form-control' id='email' name='email' placeholder='Enter email'>
-            </div>
+              <h2>Login</h2>
+              <form id='login_form'>
+                  <div class='form-group'>
+                      <label for='email'>Email address</label>
+                      <input type='email' class='form-control' id='email' name='email' placeholder='Enter email'>
+                  </div>
 
-            <div class='form-group'>
-                <label for='password'>Password</label>
-                <input type='password' class='form-control' id='password' name='password' placeholder='Password'>
-            </div>
+                  <div class='form-group'>
+                      <label for='password'>Password</label>
+                      <input type='password' class='form-control' id='password' name='password' placeholder='Password'>
+                  </div>
 
-            <button type='submit' class='btn btn-primary'>Login</button>
-        </form>
-        `;
+                  <button type='submit' class='btn btn-primary'>Login</button>
+              </form>
+              `;
 
           $("#content").html(html);
           clearResponse();
@@ -228,7 +234,62 @@
           $("#logout").hide();
         }
 
-        // showHomePage() function will be here
+        // show home page
+        function showHomePage() {
+          // validate jwt to verify access
+          var jwt = getCookie("jwt");
+          $.post("api/validate_token.php", JSON.stringify({ jwt: jwt }))
+            .done(function(result) {
+              // if valid, show homepage
+              var html = `
+      <div class="card">
+          <div class="card-header">Welcome to Home!</div>
+          <div class="card-body">
+              <h5 class="card-title">You are logged in.</h5>
+              <p class="card-text">You won't be able to access the home and account pages if you are not logged in.</p>
+          </div>
+      </div>
+      `;
+
+              $("#content").html(html);
+              showLoggedInMenu();
+            })
+
+            // show login page on error
+            .fail(function(result) {
+              showLoginPage();
+              $("#response").html(
+                "<div class='alert alert-danger'>Please login to access the home page.</div>"
+              );
+            });
+        }
+
+        // get or read cookie
+        function getCookie(cname) {
+          var name = cname + "=";
+          var decodedCookie = decodeURIComponent(document.cookie);
+          var ca = decodedCookie.split(";");
+          for (var i = 0; i < ca.length; i++) {
+            var c = ca[i];
+            while (c.charAt(0) == " ") {
+              c = c.substring(1);
+            }
+
+            if (c.indexOf(name) == 0) {
+              return c.substring(name.length, c.length);
+            }
+          }
+          return "";
+        }
+
+        // if the user is logged in
+        function showLoggedInMenu() {
+          // hide login and sign up from navbar & show logout button
+          $("#login, #sign_up").hide();
+          $("#logout").show();
+        }
+
+        // showUpdateAccountForm() will be here
 
         // function to make form values to json format
         $.fn.serializeObject = function() {
